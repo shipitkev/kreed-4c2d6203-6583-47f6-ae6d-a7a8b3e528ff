@@ -14,29 +14,21 @@ import { Logger } from '@nestjs/common';
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      useFactory: () => {
-        const config = {
-          type: 'postgres' as const,
-          host: process.env.DB_HOST || 'postgres',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.POSTGRES_USER || 'user',
-          password: process.env.POSTGRES_PASSWORD || 'password',
-          database: process.env.POSTGRES_DB || 'taskdb',
-          entities: [User, Task, Organization, UserOrganization],
-          synchronize: true,
-          extra: {
-            max: 10,
-            connectionTimeoutMillis: 10000,
-            idleTimeoutMillis: 30000,
-          },
-          logging: ['error', 'warn'],
-          retryAttempts: 3,
-          retryDelay: 3000,
-        };
-        Logger.log(`Database connection configured for: ${config.host}:${config.port}`);
-        return config;
-      },
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST || 'postgres',
+      port: parseInt(process.env.DB_PORT || '5432', 10),
+      username: process.env.POSTGRES_USER || 'user',
+      password: process.env.POSTGRES_PASSWORD || 'password',
+      database: process.env.POSTGRES_DB || 'taskdb',
+      entities: [User, Task, Organization, UserOrganization],
+      synchronize: true,
+        extra: {
+          max: 10,
+          connectionTimeoutMillis: 30000,
+          idleTimeoutMillis: 30000,
+        },
+      logging: ['error', 'warn'],
     }),
     UsersModule,
     TasksModule,
@@ -46,4 +38,8 @@ import { Logger } from '@nestjs/common';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    Logger.log(`Database connection configured for: ${process.env.DB_HOST || 'postgres'}:${process.env.DB_PORT || '5432'}`);
+  }
+}
