@@ -68,7 +68,7 @@ jobs:
             --cpu 1 \
             --min-instances 0 \
             --max-instances 10 \
-            --set-env-vars "JWT_SECRET=secretKey,PORT=8080,DB_HOST=postgres,DB_PORT=5432,POSTGRES_USER=user,POSTGRES_PASSWORD=password,POSTGRES_DB=taskdb"
+            --set-env-vars "JWT_SECRET=secretKey,DB_HOST=postgres,DB_PORT=5432,POSTGRES_USER=user,POSTGRES_PASSWORD=password,POSTGRES_DB=taskdb"
 
       - name: Deploy Dashboard to Cloud Run
         run: |
