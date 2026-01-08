@@ -1,0 +1,133 @@
+<div class="flex flex-col items-center justify-center gap-4 w-full h-screen p-3 bg-[var(--core-primary)]">
+    <div class="flex flex-col gap-2 w-full max-w-[400px] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] p-4 rounded-lg bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)]">
+        <div class="flex items-center justify-between w-full">
+            <h3 class="select-none w-full flex items-center justify-center text-xl mb-2 text-[var(--core-primary-text)]">
+                {{ onSecondStep() && isSecondStepSignUp() ? 'Sign Up' : 'Sign In' }}
+            </h3>
+        </div>
+
+        <form [formGroup]="form" class="flex flex-col gap-2 w-full">
+            <label class="text-xs select-none text-[var(--core-primary-text)]">Email</label>
+            <div class="flex gap-2 items-center">
+                @if (onSecondStep()) {
+                    <div 
+                        class="flex items-center justify-center border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded cursor-pointer text-[var(--core-primary-text)] transition-colors h-10 w-10 min-w-10 max-h-10 hover:border-[var(--core-tertiary)]"
+                        (click)="clearEmailFlow()"
+                    >
+                        <ng-icon name="ionArrowBack"></ng-icon>
+                    </div>
+                }
+                <input 
+                    type="email" 
+                    autoComplete="email"
+                    placeholder="example@email.com" 
+                    [value]="email()"
+                    (input)="email.set($any($event.target).value)"
+                    [disabled]="isEmailLoading() || onSecondStep()"
+                    class="w-full h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-primary-text)] rounded bg-[var(--core-primary)] px-3 py-2 outline-none focus:border-[var(--core-tertiary)] disabled:opacity-60 disabled:cursor-not-allowed disabled:border-[var(--core-primary-text)]"
+                />
+            </div>
+
+            @if (onSecondStep()) {
+                <label class="text-xs select-none text-[var(--core-primary-text)]">Password</label>
+                <div class="relative flex items-center">
+                    <input 
+                        [type]="showPassword() ? 'text' : 'password'" 
+                        autoComplete="password"
+                        placeholder="Password" 
+                        formControlName="password"
+                        (input)="validatePassword($any($event.target).value); form.patchValue({password: $any($event.target).value}); passwordError.set(false); passwordMessage.set('')"
+                        class="w-full h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-primary-text)] rounded bg-[var(--core-primary)] px-3 py-2 pr-12 outline-none focus:border-[var(--core-tertiary)]"
+                    />
+                    <ng-icon 
+                        [name]="showPassword() ? 'ionEyeOff' : 'ionEye'" 
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--core-primary-text)] cursor-pointer transition-colors hover:text-[var(--core-tertiary)]"
+                        (click)="togglePassword()"
+                    ></ng-icon>
+                </div>
+
+                @if (isSecondStepSignUp()) {
+                    <div class="mt-2 p-3 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] rounded-md border border-[color-mix(in_srgb,var(--core-primary-text)_15%,transparent)]">
+                        <div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mb-2">
+                            <div 
+                                class="h-full transition-all duration-300 rounded-full"
+                                [class]="{
+                                    'bg-red-600': passwordStrength().score <= 1,
+                                    'bg-orange-500': passwordStrength().score === 2,
+                                    'bg-[var(--core-warn)]': passwordStrength().score === 3,
+                                    'bg-teal-500': passwordStrength().score === 4,
+                                    'bg-[var(--core-success)]': passwordStrength().score >= 5
+                                }"
+                                [style.width.%]="(passwordStrength().score / 6) * 100"
+                            ></div>
+                        </div>
+                        <div class="text-xs font-medium mb-2 text-[var(--core-primary-text)]">
+                            @if (passwordStrength().score === 0) {
+                                Enter a password
+                            } @else if (passwordStrength().score > 0 && passwordStrength().score < 4) {
+                                Weak password
+                            } @else if (passwordStrength().score >= 4 && passwordStrength().score < 6) {
+                                Good password
+                            } @else if (passwordStrength().score === 6) {
+                                Strong password
+                            }
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            @for (requirement of passwordStrength().feedback; track $index) {
+                                <div class="flex items-center gap-1.5 text-[11px] text-[var(--core-primary-text)]">
+                                    @if (requirement.met) {
+                                        <span class="text-[var(--core-success)] font-bold w-3 text-center">✓</span>
+                                    } @else {
+                                        <span class="text-[var(--core-error)] font-bold w-3 text-center">✗</span>
+                                    }
+                                    <span>{{ requirement.text }}</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <button 
+                        (click)="handleEmailSignUp()"
+                        [disabled]="!form.get('email')?.value || !form.get('password')?.value || !passwordStrength().isValid"
+                        class="flex items-center justify-center gap-2 w-full h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer mt-2 hover:border-[var(--core-tertiary)] disabled:opacity-55 disabled:cursor-not-allowed disabled:border-[var(--core-primary-text)]"
+                    >
+                        Sign Up
+                    </button>
+                } @else {
+                    <button 
+                        (click)="handleEmailSignIn()"
+                        [disabled]="!email() || !form.get('password')?.value || authStore.isLoading()"
+                        class="flex items-center justify-center gap-2 w-full h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer mt-2 hover:border-[var(--core-tertiary)] disabled:opacity-55 disabled:cursor-not-allowed disabled:border-[var(--core-primary-text)]"
+                    >
+                        @if (authStore.isLoading()) {
+                            <ng-icon name="matRefresh" class="animate-spin"></ng-icon>
+                        }
+                        Sign In
+                    </button>
+                }
+            }
+
+            @if (!onSecondStep()) {
+                <button 
+                    (click)="handleEmailValidate()"
+                    [disabled]="isEmailLoading() || !email().trim()"
+                    class="flex items-center justify-center gap-2 w-full h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer mt-2 hover:border-[var(--core-tertiary)] disabled:opacity-55 disabled:cursor-not-allowed disabled:border-[var(--core-primary-text)]"
+                >
+                    @if (isEmailLoading()) {
+                        <ng-icon name="matRefresh" class="animate-spin"></ng-icon>
+                    }
+                    Continue with Email
+                </button>
+            }
+
+            @if (emailError() && !onSecondStep() && !isSecondStepSignUp()) {
+                <div class="flex items-center justify-center gap-1 text-xs p-2 rounded text-center bg-[var(--core-error)]/20 text-[var(--core-error)] border border-[var(--core-error)]">
+                    <span>{{ emailMessage() }}</span>
+                </div>
+            }
+
+            @if (passwordError()) {
+                <div class="flex items-center justify-center gap-1 text-xs p-2 rounded text-center bg-[var(--core-error)]/20 text-[var(--core-error)] border border-[var(--core-error)]">
+                    <span>{{ passwordMessage() }}</span>
+                </div>
+            }
+        </form>

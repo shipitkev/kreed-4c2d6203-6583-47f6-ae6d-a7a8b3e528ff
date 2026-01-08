@@ -1,0 +1,239 @@
+<div class="flex flex-col gap-6 w-full max-w-full min-w-0">
+  <h2 class="m-0 text-2xl font-semibold text-[var(--core-primary-text)]">Settings</h2>
+
+  <div class="flex flex-col gap-3">
+    <h3 class="m-0 text-xs font-semibold text-[var(--core-primary-text)] uppercase tracking-wider opacity-70">Organization</h3>
+    
+    @if (organizationsStore.organizations().length > 0) {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-[var(--core-primary-text)] mb-2">Select Organization</label>
+        <div class="flex items-center gap-2">
+          @if (editingOrgName()) {
+            <div class="flex items-center gap-1 flex-1">
+              <input
+                type="text"
+                [value]="editOrgNameValue()"
+                (input)="editOrgNameValue.set($any($event.target).value)"
+                (keydown)="onOrgNameKeyDown($event)"
+                class="flex-1 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition-colors focus:border-[var(--core-tertiary)]"
+                autofocus
+              />
+              <button
+                (click)="saveOrgName()"
+                class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-success)]"
+                title="Save (Enter)"
+              >
+                <ng-icon name="ionCheckmark" size="18px"></ng-icon>
+              </button>
+              <button
+                (click)="cancelEditOrgName()"
+                class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+                title="Cancel (Esc)"
+              >
+                <ng-icon name="ionClose" size="18px"></ng-icon>
+              </button>
+            </div>
+          } @else {
+            <div class="flex items-center gap-2 flex-1">
+              <select
+                [value]="getCurrentOrganization()?.id || ''"
+                (change)="organizationsStore.setCurrentOrganization($any($event.target).value)"
+                class="flex-1 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition-colors focus:border-[var(--core-tertiary)] cursor-pointer"
+              >
+                @for (org of organizationsStore.organizations(); track org.id) {
+                  <option [value]="org.id">{{ org.name }}</option>
+                }
+              </select>
+              @if (canEditOrganization()) {
+                <button
+                  (click)="startEditOrgName()"
+                  class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-tertiary)]"
+                  title="Edit organization name"
+                >
+                  <ng-icon name="ionPencil" size="18px"></ng-icon>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="mt-3">
+      @if (addingOrg()) {
+        <div class="flex items-center gap-1">
+          <input
+            type="text"
+            [value]="newOrgName()"
+            (input)="newOrgName.set($any($event.target).value)"
+            (keydown)="onNewOrgNameKeyDown($event)"
+            placeholder="Enter organization name..."
+            class="flex-1 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition-colors focus:border-[var(--core-tertiary)] placeholder:text-[color-mix(in_srgb,var(--core-primary-text)_40%,transparent)]"
+            autofocus
+          />
+          <button
+            (click)="saveNewOrg()"
+            class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-success)]"
+            title="Save (Enter)"
+            [disabled]="!newOrgName().trim()"
+          >
+            <ng-icon name="ionCheckmark" size="18px"></ng-icon>
+          </button>
+          <button
+            (click)="cancelAddOrg()"
+            class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+            title="Cancel (Esc)"
+          >
+            <ng-icon name="ionClose" size="18px"></ng-icon>
+          </button>
+        </div>
+      } @else {
+        <button
+          (click)="startAddOrg()"
+          class="flex items-center gap-2 px-3 py-2 bg-transparent border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md text-[var(--core-primary-text)] text-sm cursor-pointer transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:border-[var(--core-tertiary)] hover:text-[var(--core-tertiary)]"
+        >
+          <ng-icon name="ionAdd" size="18px"></ng-icon>
+          <span>Add Organization</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <h3 class="m-0 text-xs font-semibold text-[var(--core-primary-text)] uppercase tracking-wider opacity-70">Members</h3>
+    @if (getCurrentOrganization()) {
+      <div class="flex flex-col gap-2">
+        @if (members().length === 0) {
+          <div class="px-3 py-3 text-center text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] text-sm">No members found</div>
+        }
+        
+        @if (members().length > 0) {
+          @for (member of members(); track member.userId) {
+            <div class="flex items-center justify-between px-3 py-3 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md gap-3">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span class="text-sm text-[var(--core-primary-text)] font-medium flex-shrink-0 flex items-center gap-1.5">
+                  {{ member.email || 'Unknown' }}
+                  @if (member.userId === currentUserId()) {
+                    <span class="text-xs text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] font-normal">(You)</span>
+                  }
+                </span>
+                @if (editingMemberRole() === member.userId) {
+                  <div class="flex items-center gap-1">
+                    <select
+                      [value]="member.role"
+                      (change)="onRoleChange(getCurrentOrganization()!.id, member.userId, $event)"
+                      class="px-2 py-1 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-xs uppercase font-semibold outline-none cursor-pointer transition-colors focus:border-[var(--core-tertiary)]"
+                      autofocus
+                    >
+                      <option [value]="Role.OWNER">OWNER</option>
+                      <option [value]="Role.ADMIN">ADMIN</option>
+                      <option [value]="Role.VIEWER">VIEWER</option>
+                    </select>
+                    <button
+                      (click)="cancelEditMemberRole()"
+                      class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+                      title="Cancel"
+                    >
+                      <ng-icon name="ionClose" size="16px"></ng-icon>
+                    </button>
+                  </div>
+                } @else {
+                  <span class="text-xs text-[color-mix(in_srgb,var(--core-primary-text)_70%,transparent)] uppercase font-semibold px-2 py-1 bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] rounded">{{ member.role }}</span>
+                }
+              </div>
+              @if (canEditOrganization() && member.userId !== currentUserId()) {
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  @if (deletingMember() === member.userId) {
+                    <div class="flex items-center gap-1">
+                      <span class="text-xs text-[var(--core-primary-text)] mr-1">Remove?</span>
+                      <button
+                        (click)="confirmDeleteMember(getCurrentOrganization()!.id, member.userId)"
+                        class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-success)]"
+                        title="Confirm"
+                      >
+                        <ng-icon name="ionCheckmark" size="16px"></ng-icon>
+                      </button>
+                      <button
+                        (click)="cancelDeleteMember()"
+                        class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+                        title="Cancel"
+                      >
+                        <ng-icon name="ionClose" size="16px"></ng-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <button
+                      (click)="startEditMemberRole(member)"
+                      class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-tertiary)]"
+                      title="Edit role"
+                    >
+                      <ng-icon name="ionPencil" size="16px"></ng-icon>
+                    </button>
+                    <button
+                      (click)="startDeleteMember(member.userId)"
+                      class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+                      title="Remove member"
+                    >
+                      <ng-icon name="ionTrash" size="16px"></ng-icon>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+        
+        @if (canEditOrganization()) {
+          @if (addingMember()) {
+            <div class="flex items-center gap-1 px-3 py-3 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-md mt-2">
+              <input
+                type="email"
+                [value]="newMemberEmail()"
+                (input)="newMemberEmail.set($any($event.target).value)"
+                (keydown)="onNewMemberKeyDown($event)"
+                placeholder="Enter user email..."
+                class="flex-1 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition-colors focus:border-[var(--core-tertiary)] placeholder:text-[color-mix(in_srgb,var(--core-primary-text)_40%,transparent)]"
+                autofocus
+              />
+              <select
+                [value]="newMemberRole()"
+                (change)="newMemberRole.set($any($event.target).value)"
+                class="px-2 py-1 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-xs uppercase font-semibold outline-none cursor-pointer transition-colors focus:border-[var(--core-tertiary)]"
+              >
+                <option [value]="Role.VIEWER">VIEWER</option>
+                <option [value]="Role.ADMIN">ADMIN</option>
+                <option [value]="Role.OWNER">OWNER</option>
+              </select>
+              <button
+                (click)="saveNewMember()"
+                class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-success)]"
+                title="Add (Enter)"
+                [disabled]="!newMemberEmail().trim()"
+              >
+                <ng-icon name="ionCheckmark" size="16px"></ng-icon>
+              </button>
+              <button
+                (click)="cancelAddMember()"
+                class="flex items-center justify-center p-2 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer rounded transition-all hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:text-[var(--core-error)]"
+                title="Cancel (Esc)"
+              >
+                <ng-icon name="ionClose" size="16px"></ng-icon>
+              </button>
+            </div>
+          } @else {
+            <button
+              (click)="startAddMember()"
+              class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition"
+            >
+              <ng-icon name="ionAdd" size="16px"></ng-icon>
+              <span>Add Member</span>
+            </button>
+          }
+        }
+      </div>
+    } @else {
+      <div class="px-3 py-3 text-center text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] text-sm">Please select an organization</div>
+    }
+  </div>
+
+</div>

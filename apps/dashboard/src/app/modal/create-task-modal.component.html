@@ -1,0 +1,74 @@
+<div class="w-full">
+  <h3 class="text-lg font-bold mb-4 text-[var(--core-primary-text)]">Create New Task</h3>
+  @if (editableOrganizations().length === 0) {
+    <div class="text-sm text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] mb-4">
+      You don't have permission to create tasks in any organization. You need ADMIN or OWNER role.
+    </div>
+  } @else {
+  <form [formGroup]="createForm" (ngSubmit)="createTask()" class="flex flex-col">
+    @if (hasMultipleOrganizations()) {
+      <div class="mb-4">
+        <label class="block text-[var(--core-primary-text)] text-sm font-bold mb-2">Organization</label>
+        <select formControlName="organizationId" class="w-full shadow appearance-none border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded py-2 px-3 text-[var(--core-primary-text)] bg-[var(--core-secondary)] leading-tight focus:outline-none focus:border-[var(--core-tertiary)]">
+          @for (org of editableOrganizations(); track org.id) {
+            <option [value]="org.id">{{ truncateText(org.name, 25) }}</option>
+          }
+        </select>
+      </div>
+    }
+    <div class="mb-4">
+      <label class="block text-[var(--core-primary-text)] text-sm font-bold mb-2">Title</label>
+      <input formControlName="title" class="w-full shadow appearance-none border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded py-2 px-3 text-[var(--core-primary-text)] bg-[var(--core-secondary)] leading-tight focus:outline-none focus:border-[var(--core-tertiary)]">
+    </div>
+    <div class="mb-4">
+      <label class="block text-[var(--core-primary-text)] text-sm font-bold mb-2">Description</label>
+      <textarea formControlName="description" class="w-full shadow appearance-none border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded py-2 px-3 text-[var(--core-primary-text)] bg-[var(--core-secondary)] leading-tight focus:outline-none focus:border-[var(--core-tertiary)]"></textarea>
+    </div>
+    <div class="mb-4">
+      <label class="block text-[var(--core-primary-text)] text-sm font-bold mb-2">Tags</label>
+      <div class="flex gap-2 items-center">
+        <select 
+          [value]="selectedTag()" 
+          (change)="selectedTag.set($any($event.target).value)"
+          class="flex-1 shadow appearance-none border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded py-2 px-3 text-[var(--core-primary-text)] bg-[var(--core-secondary)] leading-tight focus:outline-none focus:border-[var(--core-tertiary)]">
+          <option value="">Select a tag</option>
+          @for (tag of getAvailableTags(); track tag) {
+            <option [value]="tag">{{ tag }}</option>
+          }
+        </select>
+        <button 
+          type="button"
+          (click)="addTag()" 
+          [disabled]="!selectedTag()"
+          class="flex items-center justify-center gap-1 h-10 w-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-2 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <ng-icon name="ionAdd" size="16px"></ng-icon>
+        </button>
+      </div>
+      @if (tags().size > 0) {
+        <div class="flex flex-wrap gap-2 mt-2">
+          @for (tag of tags(); track tag) {
+            <div class="flex items-center gap-1 px-2 py-1 rounded border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]">
+              <span class="text-xs text-[var(--core-primary-text)]">{{ tag }}</span>
+              <button 
+                type="button"
+                (click)="removeTag(tag)"
+                class="flex items-center justify-center w-4 h-4 text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] hover:text-[var(--core-error)] transition">
+                <ng-icon name="ionClose" size="12px"></ng-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <div class="flex justify-end gap-2 mt-2">
+      <button type="button" (click)="modalStore.setModal('')" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="createForm.invalid" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition disabled:opacity-50 disabled:cursor-not-allowed">
+        Create
+      </button>
+    </div>
+  </form>
+  }
+</div>
+

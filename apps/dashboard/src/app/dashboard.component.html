@@ -1,0 +1,189 @@
+<div class="max-h-screen overflow-hidden flex flex-col h-screen">
+  <app-top-nav></app-top-nav>
+
+  <div class="lg:px-0 bg-[var(--core-secondary)] flex-1 overflow-hidden flex flex-col">
+  <div class="flex flex-row justify-center items-center max-[900px]:flex-col max-[900px]:gap-4 border-b border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] py-4 px-4 gap-10">
+
+      <div class="relative org-filter-container">
+        <button
+          (click)="toggleDropdown(); $event.stopPropagation()"
+          class="min-w-[165px] max-w-[165px] bg-[var(--core-primary)] text-[var(--core-primary-text)] flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition"
+        >
+          <span class="text-sm font-medium">{{ getFilterButtonText() }}</span>
+          <ng-icon name="ionChevronDown" size="16px" [class.rotate-180]="showOrgFilterDropdown()" class="transition-transform"></ng-icon>
+        </button>
+        
+        @if (showOrgFilterDropdown()) {
+          <div class="absolute top-full left-0 mt-1 bg-[var(--core-primary)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-lg shadow-lg z-50 min-w-[200px] max-h-[300px] overflow-y-auto" (click)="$event.stopPropagation()">
+            <div class="p-2">
+              <!-- All checkbox -->
+              <label class="flex items-center gap-2 p-2 rounded hover:underline cursor-pointer select-none border-b border-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] mb-1">
+                <input
+                  type="checkbox"
+                  [checked]="isAllSelected()"
+                  (change)="toggleAllOrganizations()"
+                  class="w-4 h-4 rounded border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-tertiary)] focus:ring-[var(--core-tertiary)] cursor-pointer"
+                />
+                <span class="text-sm font-medium text-[var(--core-primary-text)]">All</span>
+              </label>
+              @for (org of organizationsStore.organizations(); track org.id) {
+                <label class="flex items-center gap-2 p-2 rounded hover:underline cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    [checked]="isOrganizationSelected(org.id)"
+                    (change)="toggleOrganizationFilter(org.id)"
+                    class="w-4 h-4 rounded border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-tertiary)] focus:ring-[var(--core-tertiary)] cursor-pointer"
+                  />
+                  <span class="text-sm text-[var(--core-primary-text)]" [title]="org.name">{{ truncateText(org.name, 25) }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="relative tag-filter-container">
+        <button
+          (click)="toggleTagDropdown(); $event.stopPropagation()"
+          class="min-w-[165px] max-w-[165px] bg-[var(--core-primary)] text-[var(--core-primary-text)] flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition"
+        >
+          <span class="text-sm font-medium">{{ getTagFilterButtonText() }}</span>
+          <ng-icon name="ionChevronDown" size="16px" [class.rotate-180]="showTagFilterDropdown()" class="transition-transform"></ng-icon>
+        </button>
+        
+        @if (showTagFilterDropdown()) {
+          <div class="absolute top-full left-0 mt-1 bg-[var(--core-primary)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-lg shadow-lg z-50 min-w-[200px] max-h-[300px] overflow-y-auto" (click)="$event.stopPropagation()">
+            <div class="p-2">
+              <!-- All checkbox -->
+              <label class="flex items-center gap-2 p-2 rounded hover:underline cursor-pointer select-none border-b border-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] mb-1">
+                <input
+                  type="checkbox"
+                  [checked]="isAllTagsSelected()"
+                  (change)="toggleAllTags()"
+                  class="w-4 h-4 rounded border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-tertiary)] focus:ring-[var(--core-tertiary)] cursor-pointer"
+                />
+                <span class="text-sm font-medium text-[var(--core-primary-text)]">All</span>
+              </label>
+              @for (tag of getAllAvailableTags(); track tag) {
+                <label class="flex items-center gap-2 p-2 rounded hover:underline cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    [checked]="isTagSelected(tag)"
+                    (change)="toggleTagFilter(tag)"
+                    class="w-4 h-4 rounded border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-tertiary)] focus:ring-[var(--core-tertiary)] cursor-pointer"
+                  />
+                  <span class="text-sm text-[var(--core-primary-text)]">{{ tag }}</span>
+                </label>
+              }
+              <!-- No Tags option -->
+              <label class="flex items-center gap-2 p-2 rounded hover:underline cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  [checked]="isTagSelected(NO_TAGS_OPTION)"
+                  (change)="toggleTagFilter(NO_TAGS_OPTION)"
+                  class="w-4 h-4 rounded border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] text-[var(--core-tertiary)] focus:ring-[var(--core-tertiary)] cursor-pointer"
+                />
+                <span class="text-sm text-[var(--core-primary-text)]">No Tags</span>
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="relative sort-container">
+        <div class="flex items-center gap-2 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] rounded">
+          <label class="text-sm font-medium text-[var(--core-primary-text)]">Sort by</label>
+          <button
+            (click)="toggleSortDropdown(); $event.stopPropagation()"
+            class="min-w-[140px] max-w-[140px] bg-[color-mix(in_srgb,var(--core-primary-text)_15%,transparent)] text-[var(--core-primary-text)] flex items-center justify-center gap-2 h-8 border border-[color-mix(in_srgb,var(--core-primary-text)_30%,transparent)] rounded px-2 py-1 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition"
+          >
+            <span class="text-sm font-medium">{{ getSortButtonText() }}</span>
+            <ng-icon name="ionChevronDown" size="14px" [class.rotate-180]="showSortDropdown()" class="transition-transform"></ng-icon>
+          </button>
+          <button
+            (click)="toggleSortOrder()"
+            class="flex items-center justify-center w-6 h-6 text-[var(--core-primary-text)] hover:text-[var(--core-tertiary)] transition"
+            [title]="sortOrder() === 'asc' ? 'Ascending' : 'Descending'"
+          >
+            <ng-icon [name]="sortOrder() === 'asc' ? 'ionChevronUp' : 'ionChevronDown'" size="16px"></ng-icon>
+          </button>
+        </div>
+        
+        @if (showSortDropdown()) {
+          <div class="absolute top-full left-0 mt-1 bg-[var(--core-primary)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded-lg shadow-lg z-50 min-w-[140px]" (click)="$event.stopPropagation()">
+            <div class="p-2">
+              <button
+                (click)="setSortBy('createdAt')"
+                class="w-full text-left px-2 py-1.5 rounded hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] text-sm text-[var(--core-primary-text)] cursor-pointer transition"
+                [class.bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]]="sortBy() === 'createdAt'"
+              >
+                Created At
+              </button>
+              <button
+                (click)="setSortBy('updatedAt')"
+                class="w-full text-left px-2 py-1.5 rounded hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] text-sm text-[var(--core-primary-text)] cursor-pointer transition"
+                [class.bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]]="sortBy() === 'updatedAt'"
+              >
+                Last Updated
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+    @if (canEditTasks()) {
+      <button (click)="openCreateModal()" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition">
+        <ng-icon name="ionAdd" size="16px"></ng-icon>
+        New Task
+      </button>
+    }
+  </div>
+
+  <div class="lg:px-4 flex flex-col items-center max-[1000px]:overflow-y-auto lg:flex-row lg:items-stretch lg:justify-center gap-6 pb-4 min-h-[500px] py-10 max-[1000px]:pb-[350px]" cdkDropListGroup>
+    <div *ngFor="let column of columns" class="w-full lg:flex-1 min-w-[200px] max-w-[300px] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] rounded-lg p-4">
+      <h2 class="text-sm font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wider mb-4">{{ column.title }}</h2>
+      <div
+        cdkDropList
+        [id]="column.id"
+        [cdkDropListData]="column.tasks()"
+        (cdkDropListDropped)="drop($event)"
+        class="min-h-[200px] flex flex-col gap-3"
+      >
+        @for (task of column.tasks(); track task.id) {
+          <div 
+            cdkDrag 
+            [cdkDragDisabled]="!canEditTask(task)"
+            [class.cursor-move]="canEditTask(task)"
+            [class.cursor-default]="!canEditTask(task)"
+            class="bg-[var(--core-primary)] py-9 px-4 rounded-md shadow-sm border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] hover:shadow-md group relative">
+            <div class="flex justify-between items-center mb-2 gap-2">
+              <h3 [class]="column.isDone ? 'font-medium text-[color-mix(in_srgb,var(--core-primary-text)_40%,transparent)] line-through flex-1 min-w-0 truncate' : 'font-medium text-[var(--core-primary-text)] flex-1 min-w-0 truncate'" [title]="task.title">{{ truncateText(task.title, 20) }}</h3>
+              <span class="flex justify-center text-xs font-medium text-[color-mix(in_srgb,var(--core-primary-text)_70%,transparent)] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] px-2 py-1 rounded flex-1 min-w-0 truncate text-right" [title]="getOrganizationName(task.organizationId)">{{ truncateText(getOrganizationName(task.organizationId), 15) }}</span>
+            </div>
+            <p class="text-sm text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] mt-1">{{ task.description }}</p>
+            @if (task.tags && task.tags.length > 0) {
+              <div class="flex flex-wrap gap-1 mt-2">
+                @for (tag of task.tags; track tag) {
+                  <div class="flex items-center gap-1 px-2 py-0.5 rounded border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]">
+                    <span class="text-xs text-[var(--core-primary-text)]">{{ tag }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (canEditTask(task)) {
+              <div class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button (click)="editTask(task.id); $event.stopPropagation()" class="flex items-center justify-center w-6 h-6 text-[color-mix(in_srgb,var(--core-primary-text)_40%,transparent)] hover:text-[var(--core-tertiary)] transition" title="Edit task">
+                  <ng-icon name="ionPencil" size="16px"></ng-icon>
+                </button>
+                <button (click)="deleteTask(task.id); $event.stopPropagation()" class="flex items-center justify-center w-6 h-6 text-[color-mix(in_srgb,var(--core-primary-text)_40%,transparent)] hover:text-[var(--core-error)] transition" title="Delete task">
+                  <ng-icon name="ionClose" size="16px"></ng-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+</div>

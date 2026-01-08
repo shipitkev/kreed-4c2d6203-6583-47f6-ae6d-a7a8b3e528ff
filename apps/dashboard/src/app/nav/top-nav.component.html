@@ -1,0 +1,38 @@
+<div class="h-12 bg-[var(--core-primary)] border-b border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] flex items-center justify-between px-4 select-none">
+  <!-- Left Section -->
+  <div class="flex items-center gap-1 text-[var(--core-primary-text)]">
+    <!-- Settings Button -->
+    <div 
+      class="group flex items-center justify-center p-1.5 rounded cursor-pointer transition-colors" 
+      title="Settings"
+      (click)="openSettings()"
+    >
+      <ng-icon name="ionSettings" size="18px" class="text-[var(--core-primary-text)] group-hover:text-[var(--core-tertiary)] transition-colors"></ng-icon>
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex items-center gap-1 text-[var(--core-primary-text)]">
+    <!-- Dark/Light Mode Toggle -->
+    <div 
+      class="group flex items-center justify-center p-1.5 rounded cursor-pointer transition-colors" 
+      title="{{ themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}"
+      (click)="themeService.toggleDarkMode()"
+    >
+      @if (themeService.isDarkMode()) {
+        <ng-icon name="ionSunny" size="18px" class="text-[var(--core-primary-text)] group-hover:text-[var(--core-tertiary)] transition-colors"></ng-icon>
+      } @else {
+        <ng-icon name="ionMoon" size="18px" class="text-[var(--core-primary-text)] group-hover:text-[var(--core-tertiary)] transition-colors"></ng-icon>
+      }
+    </div>
+
+    <!-- Profile Menu Button -->
+    <div 
+      class="group flex items-center justify-center p-1.5 rounded cursor-pointer transition-colors" 
+      title="Account"
+      (click)="openProfileMenu()"
+    >
+      <ng-icon name="ionPersonCircle" size="18px" class="text-[var(--core-primary-text)] group-hover:text-[var(--core-tertiary)] transition-colors"></ng-icon>
+    </div>
+  </div>
+</div>

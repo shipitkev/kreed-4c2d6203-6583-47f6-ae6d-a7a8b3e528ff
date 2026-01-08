@@ -1,0 +1,164 @@
+<div class="w-full max-w-full min-w-0">
+  @if (task()) {
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-[var(--core-primary-text)]">{{ isEditing() ? 'Edit Task' : 'Task Details' }}</h2>
+    </div>
+
+    <div class="flex flex-col gap-5">
+      @if (isEditing()) {
+        <form [formGroup]="editForm" (ngSubmit)="saveTask()" class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--core-primary-text)]">Organization</label>
+            <div class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+              {{ getOrganizationName(task()!.organizationId) }}
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--core-primary-text)]">Title</label>
+            <input 
+              formControlName="title" 
+              class="px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition focus:border-[var(--core-tertiary)]"
+              placeholder="Enter task title"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--core-primary-text)]">Description</label>
+            <textarea 
+              formControlName="description" 
+              class="px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition focus:border-[var(--core-tertiary)] resize-y min-h-[100px]"
+              placeholder="Enter task description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--core-primary-text)]">Status</label>
+            <select formControlName="status" class="px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition focus:border-[var(--core-tertiary)]">
+              <option value="OPEN">Open</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--core-primary-text)]">Tags</label>
+            <div class="flex gap-2 items-center">
+              <select 
+                [value]="selectedTag()" 
+                (change)="selectedTag.set($any($event.target).value)"
+                class="flex-1 px-3 py-2 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded bg-[var(--core-primary)] text-[var(--core-primary-text)] text-sm outline-none transition focus:border-[var(--core-tertiary)]">
+                <option value="">Select a tag</option>
+                @for (tag of getAvailableTags(); track tag) {
+                  <option [value]="tag">{{ tag }}</option>
+                }
+              </select>
+              <button 
+                type="button"
+                (click)="addTag()" 
+                [disabled]="!selectedTag()"
+                class="flex items-center justify-center gap-1 h-10 w-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-2 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <ng-icon name="ionAdd" size="16px"></ng-icon>
+              </button>
+            </div>
+            @if (tags().size > 0) {
+              <div class="flex flex-wrap gap-2 mt-2">
+                @for (tag of tags(); track tag) {
+                  <div class="flex items-center gap-1 px-2 py-1 rounded border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]">
+                    <span class="text-xs text-[var(--core-primary-text)]">{{ tag }}</span>
+                    <button 
+                      type="button"
+                      (click)="removeTag(tag)"
+                      class="flex items-center justify-center w-4 h-4 text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] hover:text-[var(--core-error)] transition">
+                      <ng-icon name="ionClose" size="12px"></ng-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="flex justify-end gap-2 mt-2">
+            <button type="button" (click)="cancelEdit()" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="editForm.invalid" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition disabled:opacity-50 disabled:cursor-not-allowed">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Organization</span>
+            <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+              {{ getOrganizationName(task()!.organizationId) }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Title</span>
+            <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+              {{ task()!.title }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Description</span>
+            <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+              {{ task()!.description }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Status</span>
+            <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+              {{ task()!.status }}
+            </span>
+          </div>
+
+          @if (tags().size > 0) {
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Tags</span>
+              <div class="flex flex-wrap gap-2">
+                @for (tag of tags(); track tag) {
+                  <div class="flex items-center gap-1 px-2 py-1 rounded border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)]">
+                    <span class="text-xs text-[var(--core-primary-text)]">{{ tag }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (task()!.createdAt) {
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Created At</span>
+              <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+                {{ task()!.createdAt | date:'medium' }}
+              </span>
+            </div>
+          }
+
+          @if (task()!.updatedAt) {
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wide">Last Updated</span>
+              <span class="text-sm text-[var(--core-primary-text)] px-3 py-2 bg-[color-mix(in_srgb,var(--core-primary-text)_5%,transparent)] border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] rounded">
+                {{ task()!.updatedAt | date:'medium' }}
+              </span>
+            </div>
+          }
+
+          <div class="flex justify-end mt-2">
+            <button (click)="startEdit()" class="flex items-center justify-center gap-2 h-10 border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] rounded px-3 py-2 outline-none cursor-pointer hover:border-[var(--core-tertiary)] transition">
+              Edit Task
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-center py-10 text-[var(--core-primary-text)]">Loading task...</div>
+  }
+</div>
+

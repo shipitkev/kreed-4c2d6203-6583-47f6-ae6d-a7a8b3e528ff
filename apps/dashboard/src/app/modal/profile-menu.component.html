@@ -1,0 +1,42 @@
+<div class="flex flex-col min-w-[300px]">
+  <div class="p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-[var(--core-tertiary)] text-[var(--core-primary)] flex items-center justify-center text-xl font-semibold flex-shrink-0">
+        {{ (authStore.user()?.email?.charAt(0) || 'U').toUpperCase() }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-base font-medium text-[var(--core-primary-text)] mb-1 break-words">{{ authStore.user()?.email }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-px bg-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] my-2"></div>
+
+  <div class="flex flex-col py-2">
+    @if (hasOtherAccounts()) {
+      <div class="px-4 py-2 text-xs font-semibold text-[color-mix(in_srgb,var(--core-primary-text)_60%,transparent)] uppercase tracking-wider">Switch Account</div>
+      @for (account of otherAccounts(); track account.userId) {
+        <button class="flex items-center gap-3 px-4 py-2.5 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] text-left text-sm" (click)="switchToAccount(account.userId)">
+          <div class="w-8 h-8 rounded-full bg-[var(--core-tertiary)] text-[var(--core-primary)] flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            {{ (account.email.charAt(0) || 'U').toUpperCase() }}
+          </div>
+          <div class="flex-1 flex flex-col gap-0.5 min-w-0">
+            <div class="text-sm text-[var(--core-primary-text)] break-words">{{ account.email }}</div>
+          </div>
+        </button>
+      }
+      <div class="h-px bg-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] my-2"></div>
+    }
+    
+    <button class="group flex items-center gap-3 px-4 py-3 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] text-left text-sm" (click)="addAccount()">
+      <ng-icon name="ionAdd" size="18px" class="w-6 flex items-center justify-center text-[var(--core-primary-text)] transition-colors group-hover:text-[var(--core-tertiary)]"></ng-icon>
+      <span class="flex-1">Add Account</span>
+    </button>
+    
+    <button class="group flex items-center gap-3 px-4 py-3 bg-transparent border-none text-[var(--core-primary-text)] cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] text-left text-sm" (click)="logout()">
+      <ng-icon name="ionPower" size="18px" class="w-6 flex items-center justify-center text-[var(--core-primary-text)] transition-colors group-hover:text-[var(--core-tertiary)]"></ng-icon>
+      <span class="flex-1">Sign Out</span>
+    </button>
+  </div>
+</div>
+

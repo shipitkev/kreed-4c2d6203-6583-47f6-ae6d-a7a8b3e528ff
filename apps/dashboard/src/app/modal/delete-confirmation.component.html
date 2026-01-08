@@ -1,0 +1,9 @@
+<div class="flex flex-col gap-5">
+  <h3 class="m-0 text-xl font-semibold text-[var(--core-primary-text)]">Delete Task</h3>
+  <p class="m-0 text-[color-mix(in_srgb,var(--core-primary-text)_80%,transparent)] leading-relaxed">Are you sure you want to delete this task? This action cannot be undone.</p>
+  <div class="flex gap-3 justify-end mt-2">
+    <button class="px-5 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-all border border-[color-mix(in_srgb,var(--core-primary-text)_20%,transparent)] bg-[var(--core-primary)] text-[var(--core-primary-text)] hover:bg-[color-mix(in_srgb,var(--core-primary-text)_10%,transparent)] hover:border-[color-mix(in_srgb,var(--core-primary-text)_30%,transparent)]" (click)="cancel()">Cancel</button>
+    <button class="px-5 py-2.5 rounded-md text-sm font-medium cursor-pointer transition-all border border-[var(--core-error)] bg-[var(--core-error)] text-[var(--core-secondary-text)] hover:opacity-90 hover:-translate-y-px active:translate-y-0" (click)="confirmDelete()">Delete</button>
+  </div>
+</div>
+

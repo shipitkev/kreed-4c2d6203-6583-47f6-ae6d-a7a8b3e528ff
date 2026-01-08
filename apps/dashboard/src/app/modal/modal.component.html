@@ -1,0 +1,38 @@
+@if (modalStore.modal() !== '') {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000000] p-5" (click)="handleOverlayClick($event)">
+    <div class="font-inherit text-[var(--core-primary-text)] bg-[var(--core-primary)] border border-[color-mix(in_srgb,var(--core-primary-text)_50%,transparent)] rounded-lg w-[90vw] max-w-[600px] max-h-[90vh] p-0 overflow-y-auto relative shadow-[0_10px_25px_rgba(0,0,0,0.3)] [&.profile-menu-modal]:max-w-[400px] [&.profile-menu-modal]:min-w-[300px] [&.settings-modal]:max-w-[90vw] [&.task-view-modal]:max-w-[90vw]" [class.profile-menu-modal]="isProfileMenu()" [class.settings-modal]="getModalName() === 'settings'" [class.task-view-modal]="getModalName() === 'view-task'" id="root-modal">
+      @if (!isProfileMenu()) {
+        <button 
+          class="absolute top-3 right-3 bg-transparent border-none text-2xl text-[var(--core-primary-text)] cursor-pointer p-1 leading-none transition-colors hover:text-[var(--core-tertiary)] flex items-center justify-center"
+          (click)="closeModal()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      }
+      <div class="w-full p-6">
+        @switch (getModalName()) {
+          @case ('delete-task') {
+            <app-delete-confirmation></app-delete-confirmation>
+          }
+          @case ('profile-menu') {
+            <app-profile-menu></app-profile-menu>
+          }
+          @case ('settings') {
+            <app-settings-modal></app-settings-modal>
+          }
+          @case ('view-task') {
+            <app-task-view-modal></app-task-view-modal>
+          }
+          @case ('create-task') {
+            <app-create-task-modal></app-create-task-modal>
+          }
+          @default {
+            <div>Unknown Modal: {{ modalStore.modal() }}</div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
+
