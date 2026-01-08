@@ -1,0 +1,75 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGION: us-central1
+  API_SERVICE_NAME: ${{ secrets.GCP_APPLICATION }}-api
+  DASHBOARD_SERVICE_NAME: ${{ secrets.GCP_APPLICATION }}-dashboard
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Authenticate to Google Cloud
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS }}" > /tmp/gcp-key.json
+          gcloud auth activate-service-account ${{ secrets.GCP_EMAIL }} --key-file=/tmp/gcp-key.json
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
+          gcloud auth configure-docker
+
+      - name: Build and push API Docker image
+        run: |
+          docker build -f Dockerfile.api -t gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.API_SERVICE_NAME }}:${{ github.ref_name }} .
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.API_SERVICE_NAME }}:${{ github.ref_name }}
+
+      - name: Build and push Dashboard Docker image
+        run: |
+          docker build -f Dockerfile.dashboard -t gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.DASHBOARD_SERVICE_NAME }}:${{ github.ref_name }} .
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.DASHBOARD_SERVICE_NAME }}:${{ github.ref_name }}
+
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.API_SERVICE_NAME }} \
+            --image gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.API_SERVICE_NAME }}:${{ github.ref_name }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10 \
+            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},PORT=8080,DB_HOST=${{ secrets.DB_HOST }},DB_PORT=${{ secrets.DB_PORT }},POSTGRES_USER=${{ secrets.POSTGRES_USER }},POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }},POSTGRES_DB=${{ secrets.POSTGRES_DB }}"
+
+      - name: Deploy Dashboard to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.DASHBOARD_SERVICE_NAME }} \
+            --image gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.DASHBOARD_SERVICE_NAME }}:${{ github.ref_name }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 4200 \
+            --memory 256Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10
+
+      - name: Output service URLs
+        run: |
+          echo "API Service URL: https://${{ env.API_SERVICE_NAME }}-${{ secrets.GCP_PROJECT }}.a.run.app"
+          echo "Dashboard Service URL: https://${{ env.DASHBOARD_SERVICE_NAME }}-${{ secrets.GCP_PROJECT }}.a.run.app"
+
