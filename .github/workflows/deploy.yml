@@ -69,9 +69,8 @@ jobs:
             --min-instances 0 \
             --max-instances 10 \
             --timeout 900 \
-            --startup-cpu-boost \
-            --set-env-vars "JWT_SECRET=secretKey,DB_HOST=postgres,DB_PORT=5432,POSTGRES_USER=user,POSTGRES_PASSWORD=password,POSTGRES_DB=taskdb" \
-            --health-check-path "/api/health"
+            --cpu-boost \
+            --set-env-vars "JWT_SECRET=secretKey,DB_HOST=postgres,DB_PORT=5432,POSTGRES_USER=user,POSTGRES_PASSWORD=password,POSTGRES_DB=taskdb"
 
       - name: Deploy Dashboard to Cloud Run
         run: |
