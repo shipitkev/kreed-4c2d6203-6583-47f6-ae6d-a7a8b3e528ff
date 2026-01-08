@@ -20,11 +20,6 @@ export class AppController {
     return this.appService.getData();
   }
 
-  @Get('health')
-  health() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
-  }
-
   // DEVELOPMENT ONLY - DELETE BEFORE PRODUCTION
   // Clears all data from the database
   @Get('clear')

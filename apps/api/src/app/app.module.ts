@@ -10,7 +10,6 @@ import { User } from './users/entities/user.entity';
 import { Task } from './tasks/entities/task.entity';
 import { Organization } from './organizations/entities/organization.entity';
 import { UserOrganization } from './organizations/entities/user-organization.entity';
-import { Logger } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -23,12 +22,6 @@ import { Logger } from '@nestjs/common';
       database: process.env.POSTGRES_DB || 'taskdb',
       entities: [User, Task, Organization, UserOrganization],
       synchronize: true,
-      extra: {
-        max: 10,
-        connectionTimeoutMillis: 10000,
-        idleTimeoutMillis: 30000,
-      },
-      logging: ['error', 'warn'],
     }),
     UsersModule,
     TasksModule,
@@ -38,8 +31,4 @@ import { Logger } from '@nestjs/common';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor() {
-    Logger.log(`Database connection configured for: ${process.env.DB_HOST || 'postgres'}:${process.env.DB_PORT || '5432'}`);
-  }
-}
+export class AppModule {}
