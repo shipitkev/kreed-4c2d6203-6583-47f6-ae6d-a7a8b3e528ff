@@ -23,11 +23,11 @@ import { Logger } from '@nestjs/common';
       database: process.env.POSTGRES_DB || 'taskdb',
       entities: [User, Task, Organization, UserOrganization],
       synchronize: true,
-        extra: {
-          max: 10,
-          connectionTimeoutMillis: 30000,
-          idleTimeoutMillis: 30000,
-        },
+      extra: {
+        max: 10,
+        connectionTimeoutMillis: 10000,
+        idleTimeoutMillis: 30000,
+      },
       logging: ['error', 'warn'],
     }),
     UsersModule,

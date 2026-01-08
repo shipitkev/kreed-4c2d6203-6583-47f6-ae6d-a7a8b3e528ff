@@ -68,7 +68,7 @@ jobs:
             --cpu 1 \
             --min-instances 0 \
             --max-instances 10 \
-            --timeout 900 \
+            --timeout 300 \
             --startup-cpu-boost \
             --set-env-vars "JWT_SECRET=secretKey,DB_HOST=postgres,DB_PORT=5432,POSTGRES_USER=user,POSTGRES_PASSWORD=password,POSTGRES_DB=taskdb" \
             --health-check-path "/api/health"
