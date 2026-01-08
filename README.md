@@ -2,6 +2,9 @@
 
 A full-stack task management application with role-based access control (RBAC), built with NestJS backend, Angular frontend, and PostgreSQL database.
 
+## Video Demo
+https://streamable.com/juz59i
+
 ## Setup Instructions
 
 ### Prerequisites
