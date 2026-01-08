@@ -30,7 +30,7 @@ import { Logger } from '@nestjs/common';
             connectionTimeoutMillis: 10000,
             idleTimeoutMillis: 30000,
           },
-          logging: ['error', 'warn'] as const,
+          logging: ['error', 'warn'],
           retryAttempts: 3,
           retryDelay: 3000,
         };
